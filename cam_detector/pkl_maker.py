@@ -9,7 +9,6 @@ from utils import ddict2dict
 
 
 for (path, dirs, files) in os.walk('data/non-camera'):
-
     for filename in files:
         ext = os.path.splitext(filename)[-1]
         if ext not in ['.pcap', '.cap']:

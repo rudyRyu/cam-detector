@@ -47,11 +47,7 @@ def get_pld_stability(length_list, split_num=50):
     stb = cum_s/(block_num-1)
     return stb
 
-def ddict2dict(d):
-    for k, v in d.items():
-        if isinstance(v, dict):
-            d[k] = ddict2dict(v)
-    return dict(d)
+
 
 if __name__ == '__main__':
     print(ecdf([3, 55, 0.5, 1.5]))

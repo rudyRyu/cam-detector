@@ -56,19 +56,28 @@ def read_cap(path, *, save_pkl=False,
 
 def read_dir(path, *, save_pkl=True,
                       annotate_path='',
-                      ) -> (dict, int):
+                      return_flows_list=False) -> (dict, int):
     count = 0
+    if return_flows_list:
+        flows_list = []
+
     for (path, dirs, files) in os.walk(path):
-        for filename in files:
-            ext = os.path.splitext(filename)[-1]
-            if ext not in ['.pcap', '.cap']:
+        for file_name in files:
+            file_path = os.path.join(path, file_name)
+            if check_path_type(file_path) != 'cap':
                 continue
 
-            flows = read_cap(os.path.join(path, filename))
+            flows = read_cap(file_path, save_pkl=True,
+                                        annotate_path=annotate_path)
+            if return_flows_list:
+                flows_list.append(flows)
 
             count += 1
 
-    return count
+    if return_flows_list:
+        return flows_list, count
+    else:
+        return None, count
 
 
 def check_path_type(path) -> str:

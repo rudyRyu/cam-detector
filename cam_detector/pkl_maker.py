@@ -99,20 +99,19 @@ def check_path_type(path) -> str:
     return path_type
 
 
-def make_pkl(dir_or_file_path):
+def make_pkl(dir_or_file_path, *, save_pkl=True,
+                                  annotate_path=''):
     path_type = check_path_type(dir_or_file_path)
     if path_type == 'dir':
-        pass
+        _, count = read_dir(dir_or_file_path, save_pkl=save_pkl,
+                                              annotate_path=annotate_path,
+                                              return_flows_list=False)
+        return count
 
     elif path_type == 'cap':
-        ext = os.path.splitext(dir_or_file_path)[-1]
-        if ext not in ['.pcap', '.cap']:
-            print('This is not an capture file.')
-            return 0
-        else:
-            flows = read_cap(dir_or_file_path, save_pkl=True,
-                                               annotate_path='test.txt')
-            return 1
+        flows = read_cap(dir_or_file_path, save_pkl=save_pkl,
+                                           annotate_path=annotate_path)
+        return 1
 
     else:
         print('invalid path')
@@ -130,9 +129,9 @@ if __name__ == '__main__':
     args = argparser.parse_args()
     path = args.path
 
-    count = make_pkl(path)
-
-    # if count > 1:
-    #     print(f'{count} pkl files have been made.')
-    # else:
-    #     print(f'{count} pkl file has been made.')
+    count = make_pkl(path, save_pkl=True,
+                           annotate_path='pos_list.txt')
+    if count > 1:
+        print(f'{count} pkl files have been made.')
+    else:
+        print(f'{count} pkl file has been made.')

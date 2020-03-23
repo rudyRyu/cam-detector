@@ -16,6 +16,13 @@ def ddict2dict(d):
     return dict(d)
 
 
+def read_pkl(path) -> dict:
+    with open(path, 'rb') as fp:
+        flows = pickle.load(fp)
+
+    return flows
+
+
 def remove_dummy_data(flows):
 
     key_len_list = []

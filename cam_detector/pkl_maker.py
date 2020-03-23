@@ -126,11 +126,28 @@ if __name__ == '__main__':
         required=True,
         help='path to directory or file')
 
+    argparser.add_argument(
+        '-a',
+        '--annotate',
+        required=False,
+        default='',
+        help='annotation path. ex) positive.txt')
+
+    argparser.add_argument(
+        '-s',
+        '--save_pkl',
+        required=False,
+        default=True,
+        help='whether to save data with pickle files')
+
     args = argparser.parse_args()
     path = args.path
+    annotate = args.annotate
+    save_pkl = args.save_pkl
 
-    count = make_pkl(path, save_pkl=True,
-                           annotate_path='pos_list.txt')
+    count = make_pkl(path, save_pkl=save_pkl,
+                           annotate_path=annotate)
+
     if count > 1:
         print(f'{count} pkl files have been made.')
     else:

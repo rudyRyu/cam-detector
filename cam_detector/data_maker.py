@@ -46,7 +46,9 @@ def make_data_list(path_list) -> list:
 
                     for i in range(0, len(data), MIN_DATA_SIZE//2):
                         vector = get_vector(data[i:i+MIN_DATA_SIZE])
+                        data_list.append(vector)
 
+    return data_list
 
 if __name__ == '__main__':
     with open('pos_paths.txt', 'r') as f:

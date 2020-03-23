@@ -14,6 +14,20 @@ def ddict2dict(d):
     return dict(d)
 
 
+def remove_dummy_data(flows):
+
+    key_len_list = []
+    for src, src_value in flows.items():
+        for dst, dst_value in src_value.items():
+            for fc, fc_value in dst_value.items():
+                key_len_list.append((src, dst, fc, len(fc_value)))
+
+    if len(key_len_list) > 1:
+        key_len_list = sorted(key_len_list, key=itemgetter(3), reverse=True)
+        for t in key_len_list[1:]:
+            del flows[t[0]][t[1]][t[2]]
+
+
 def read_cap(path, *, save_pkl=False,
                       annotate_path='') -> dict:
     cap = pyshark.FileCapture(path)

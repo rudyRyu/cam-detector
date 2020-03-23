@@ -2,7 +2,9 @@ import argparse
 import os
 import pickle
 from collections import defaultdict
+from operator import itemgetter
 from pprint import pprint
+
 
 import pyshark
 
@@ -33,41 +35,74 @@ def read_cap(path, *, save_pkl=False,
                       remove_dummies=True,
                       verbose=True) -> dict:
 
+    try:
+        cap = pyshark.FileCapture(path)
+    except pyshark.capture.capture.TSharkCrashException as e:
+        pass
+
     flows = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
                 lambda: [])))
 
-    for i, packet in enumerate(cap):
+    i = 0
+    while True:
         try:
-            src = packet.layers[2].sa # source MAC
-            dst = packet.layers[2].da # destination MAC
-            fc = packet.layers[2].fc_ds # frame control
-            length = len(packet)
-            duration = float(packet.layers[2].duration)
-            data = {
-                'length': length,
-                'duration': duration
-            }
-        except:
-            continue
+            packet = cap.next()
 
-        flows[src][dst][fc].append(data)
+        except StopIteration:
+            break
 
-    cap.close()
+        except Exception as e: #pyshark.capture.capture.TSharkCrashException as e:
+            print('exception')
+            break
+
+        else:
+            try:
+                src = packet.layers[2].sa # source MAC
+                dst = packet.layers[2].da # destination MAC
+                fc = packet.layers[2].fc_ds # frame control
+                length = len(packet)
+                duration = float(packet.layers[2].duration)
+                time_delta = float(packet.frame_info.time_delta)
+                time_relative = float(packet.frame_info.time_relative)
+                data = {
+                    'length': length,
+                    'duration': duration,
+                    'time_delta': time_delta,
+                    'time_relative': time_relative
+                }
+
+            except:
+                continue
+
+            i += 1
+            flows[src][dst][fc].append(data)
+
+    try:
+        cap.close()
+    except:
+        print('close except')
+
     if remove_dummies:
         remove_dummy_data(flows)
 
     flows = ddict2dict(flows)
 
     if save_pkl:
-        pkl_name = f'{os.path.splitext(path)[0]}.pkl'
-        with open(pkl_name, 'wb') as fp:
+        pkl_path = f'{os.path.splitext(path)[0]}.pkl'
+        with open(pkl_path, 'wb') as fp:
             pickle.dump(flows, fp)
+
+        if verbose:
+            print(f'{os.path.split(pkl_path)[-1]} has been created.')
 
         if annotate_path:
             with open(annotate_path, 'a') as f:
-                f.write(pkl_name + '\n')
+                f.write(pkl_path + '\n')
+
+            if verbose:
+                print(f'{os.path.split(pkl_path)[-1]} path has been added.\n')
 
     return flows
 
@@ -185,7 +220,8 @@ if __name__ == '__main__':
                            annotate_path=annotate,
                            remove_dummies=remove_dummies)
 
-    if count > 1:
-        print(f'{count} pkl files have been made.')
-    else:
-        print(f'{count} pkl file has been made.')
+    if save_pkl:
+        if count > 1:
+            print(f'{count} pkl files have been made.')
+        else:
+            print(f'{count} pkl file has been made.')

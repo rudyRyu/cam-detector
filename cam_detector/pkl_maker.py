@@ -159,8 +159,8 @@ if __name__ == '__main__':
     argparser.add_argument(
         '-s',
         '--save_pkl',
-        required=False,
-        default=True,
+        action='store_true',
+        default=False,
         help='whether to save data with pickle files')
 
     argparser.add_argument(

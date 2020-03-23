@@ -22,6 +22,21 @@ MIN_DATA_SIZE = 300
 
 def get_vector(data) -> list:
 
+def get_pld_stb(data, split_num=50):
+    block_num = (len(data)+(split_num//2)) // split_num
+    if block_num <= 1:
+        raise ValueError('The number of block must be over 1')
+
+    cum_s = 0
+    l1 = data[:split_num]
+    for j in range(1, block_num):
+        lj = data[j*split_num:(j+1)*split_num]
+        cum_s += ks_2samp(l1, lj).statistic
+
+    stb = cum_s/(block_num-1)
+    return stb
+
+
     print('packet num:', len(data))
 
     length_list = [d['length'] for d in data]

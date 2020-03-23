@@ -29,8 +29,10 @@ def remove_dummy_data(flows):
 
 
 def read_cap(path, *, save_pkl=False,
-                      annotate_path='') -> dict:
-    cap = pyshark.FileCapture(path)
+                      annotate_path='',
+                      remove_dummies=True,
+                      verbose=True) -> dict:
+
     flows = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
@@ -53,6 +55,8 @@ def read_cap(path, *, save_pkl=False,
         flows[src][dst][fc].append(data)
 
     cap.close()
+    if remove_dummies:
+        remove_dummy_data(flows)
 
     flows = ddict2dict(flows)
 
@@ -70,6 +74,7 @@ def read_cap(path, *, save_pkl=False,
 
 def read_dir(path, *, save_pkl=True,
                       annotate_path='',
+                      remove_dummies=False,
                       return_flows_list=False) -> (dict, int):
     count = 0
     if return_flows_list:
@@ -81,8 +86,9 @@ def read_dir(path, *, save_pkl=True,
             if check_path_type(file_path) != 'cap':
                 continue
 
-            flows = read_cap(file_path, save_pkl=True,
-                                        annotate_path=annotate_path)
+            flows = read_cap(file_path, save_pkl=save_pkl,
+                                        annotate_path=annotate_path,
+                                        remove_dummies=remove_dummies)
             if return_flows_list:
                 flows_list.append(flows)
 
@@ -114,17 +120,20 @@ def check_path_type(path) -> str:
 
 
 def make_pkl(dir_or_file_path, *, save_pkl=True,
-                                  annotate_path=''):
+                                  annotate_path='',
+                                  remove_dummies=False):
     path_type = check_path_type(dir_or_file_path)
     if path_type == 'dir':
         _, count = read_dir(dir_or_file_path, save_pkl=save_pkl,
                                               annotate_path=annotate_path,
+                                              remove_dummies=remove_dummies,
                                               return_flows_list=False)
         return count
 
     elif path_type == 'cap':
         flows = read_cap(dir_or_file_path, save_pkl=save_pkl,
-                                           annotate_path=annotate_path)
+                                           annotate_path=annotate_path,
+                                           remove_dummies=remove_dummies)
         return 1
 
     else:
@@ -154,13 +163,27 @@ if __name__ == '__main__':
         default=True,
         help='whether to save data with pickle files')
 
+    argparser.add_argument(
+        '-r',
+        '--remove_dummies',
+        action='store_true',
+        default=False,
+        help='whether to remove dummies')
+
     args = argparser.parse_args()
     path = args.path
     annotate = args.annotate
     save_pkl = args.save_pkl
+    remove_dummies = args.remove_dummies
+
+    print('path:', path)
+    print('annotate:', annotate)
+    print('save_pkl:', save_pkl)
+    print('remove_dummies:', remove_dummies)
 
     count = make_pkl(path, save_pkl=save_pkl,
-                           annotate_path=annotate)
+                           annotate_path=annotate,
+                           remove_dummies=remove_dummies)
 
     if count > 1:
         print(f'{count} pkl files have been made.')

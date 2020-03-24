@@ -19,7 +19,8 @@ from scipy.stats import ks_2samp
 from utils import get_pld_stability
 
 
-MIN_DATA_SIZE = 300
+MIN_DATA_SIZE = 1000
+STEP_DIVISION = 2
 
 
 def get_cdf1(data):
@@ -135,7 +136,9 @@ def make_data_list(path_list) -> list:
                     if len(data) < MIN_DATA_SIZE:
                         continue
 
-                    for i in range(0, len(data), MIN_DATA_SIZE//2):
+                    stop_len = len(data)-MIN_DATA_SIZE
+                    step_size = MIN_DATA_SIZE//STEP_DIVISION
+                    for i in range(0, stop_len, step_size):
                         vector = get_vector(data[i:i+MIN_DATA_SIZE])
                         data_list.append(vector)
 

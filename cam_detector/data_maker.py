@@ -12,6 +12,7 @@ Process
 """
 
 import pickle
+from scipy.stats import norm, ks_2samp
 
 from pkl_maker import read_pkl
 from scipy.stats import ks_2samp
@@ -19,6 +20,48 @@ from utils import get_pld_stability
 
 
 MIN_DATA_SIZE = 300
+
+
+def get_cdf1(data):
+    hist, bin_edges = np.histogram(data, bins=len(data), density=True)
+    cdf = np.cumsum(hist*np.diff(bin_edges))
+    return cdf
+
+
+def get_cdf2(data):
+    sorted_data = np.sort(data)
+    cdf = np.arange(len(sorted_data))/float(len(sorted_data)-1)
+    return cdf
+
+
+def get_cdf3(data):
+    data_size=len(data)
+
+    # Set bins edges
+    data_set=sorted(set(data))
+    bins=np.append(data_set, data_set[-1]+1)
+
+    # Use the histogram function to bin the data
+    counts, bin_edges = np.histogram(data, bins=bins, density=False)
+    counts=counts.astype(float)/data_size
+
+    # Find the cdf
+    cdf = np.cumsum(counts)
+    return cdf
+
+
+def get_pld(data, split_num=50):
+    block_num = (len(data)+(split_num//2)) // split_num
+    if block_num <= 1:
+        raise ValueError('The number of blocks must be greater than 1')
+
+    for i in range(block_num):
+        data_clip = data[i*split_num:(i+1)*split_num]
+
+        print(get_cdf1(data_clip))
+        print(get_cdf2(data_clip))
+        print(get_cdf3(data_clip))
+        input()
 
 
 def get_bandwidth_std(data):
@@ -37,7 +80,10 @@ def get_duration_std(data):
 def get_duration_avg(data):
     return np.mean(data)
 
-def get_vector(data) -> list:
+
+def get_length_sum(data):
+    return sum(data)
+
 
 def get_pld_stb(data, split_num=50):
     block_num = (len(data)+(split_num//2)) // split_num
@@ -57,7 +103,9 @@ def get_pld_stb(data, split_num=50):
     print('packet num:', len(data))
 
     length_list = [d['length'] for d in data]
-    print(get_pld_stability(length_list, split_num=50))
+    # pld = get_pld(length_list, split_num=50)
+    pld_stb = get_pld_stb(length_list, split_num=50)
+    length_sum = get_length_sum(length_list)
 
     print()
     input()

@@ -21,6 +21,15 @@ from utils import get_pld_stability
 MIN_DATA_SIZE = 300
 
 
+def get_bandwidth_std(data):
+    bandwidth_list = []
+    for time_delta, length in data[1:]:
+        bps = (1./time_delta)*(length/1024*8)
+        bandwidth_list.append(bps)
+
+    return np.std(bandwidth_list)
+
+
 def get_duration_std(data):
     return np.std(data)
 
@@ -56,6 +65,8 @@ def get_pld_stb(data, split_num=50):
     duration_std = get_duration_std(duration_list)
     duration_avg = get_duration_avg(duration_list)
 
+    bandwidth_list = [(d['time_delta'], d['length']) for d in data]
+    bandwidth_std = get_bandwidth_std(bandwidth_list)
 
 
 def make_data_list(path_list) -> list:

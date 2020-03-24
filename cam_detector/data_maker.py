@@ -20,6 +20,14 @@ from utils import get_pld_stability
 
 MIN_DATA_SIZE = 300
 
+
+def get_duration_std(data):
+    return np.std(data)
+
+
+def get_duration_avg(data):
+    return np.mean(data)
+
 def get_vector(data) -> list:
 
 def get_pld_stb(data, split_num=50):
@@ -44,6 +52,9 @@ def get_pld_stb(data, split_num=50):
 
     print()
     input()
+    duration_list = [d['duration'] for d in data]
+    duration_std = get_duration_std(duration_list)
+    duration_avg = get_duration_avg(duration_list)
 
 
 

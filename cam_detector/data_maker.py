@@ -28,18 +28,12 @@ STEP_DIVISION = 2
 
 
 def get_cdf1(data):
-    hist, bin_edges = np.histogram(data, bins=len(data), density=True)
+    hist, bin_edges = np.histogram(data, bins=20, density=True)
     cdf = np.cumsum(hist*np.diff(bin_edges))
     return cdf
 
 
 def get_cdf2(data):
-    sorted_data = np.sort(data)
-    cdf = np.arange(len(sorted_data))/float(len(sorted_data)-1)
-    return cdf
-
-
-def get_cdf3(data):
     data_size=len(data)
 
     # Set bins edges
@@ -75,13 +69,36 @@ def get_pld_stb(data, split_num=50):
         raise ValueError('The number of blocks must be greater than 1')
 
     cum_s = 0
+    cum_p = 0
     l1 = data[:split_num]
     for j in range(1, block_num):
         lj = data[j*split_num:(j+1)*split_num]
-        cum_s += ks_2samp(l1, lj).statistic
 
-    stb = cum_s/(block_num-1)
-    return stb
+        cum_s += ks_2samp(l1, lj).statistic
+        cum_p += ks_2samp(l1, lj).pvalue
+
+    statistic_stb = cum_s/(block_num-1)
+    pvalue_stb = cum_p/(block_num-1)
+    return statistic_stb, pvalue_stb
+
+
+def get_pld_stb_with_cdf(data, split_num=50):
+    block_num = (len(data)+(split_num//2)) // split_num
+    if block_num <= 1:
+        raise ValueError('The number of blocks must be greater than 1')
+
+    cum_s = 0
+    cum_p = 0
+    l1 = get_cdf1(data[:split_num])
+    for j in range(1, block_num):
+        lj = get_cdf1(data[j*split_num:(j+1)*split_num])
+
+        cum_s += ks_2samp(l1, lj).statistic
+        cum_p += ks_2samp(l1, lj).pvalue
+
+    statistic_stb = cum_s/(block_num-1)
+    pvalue_stb = cum_p/(block_num-1)
+    return statistic_stb, pvalue_stb
 
 
 def get_bandwidth_std(data):
@@ -108,7 +125,10 @@ def get_length_sum(data):
 def get_vector(data) -> list:
     length_list = [d['length'] for d in data]
     # pld = get_pld(length_list, split_num=50)
-    pld_stb = get_pld_stb(length_list, split_num=50)
+    pld_stat_stb, pld_pval_stb = get_pld_stb(length_list, split_num=SPLIT_NUM)
+    pld_stat_stb_with_cdf, pld_pval_stb_with_cdf = get_pld_stb_with_cdf(
+                                                        length_list,
+                                                        split_num=SPLIT_NUM)
     length_sum = get_length_sum(length_list)
 
     duration_list = [d['duration'] for d in data]

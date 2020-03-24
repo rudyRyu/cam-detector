@@ -100,15 +100,12 @@ def get_pld_stb(data, split_num=50):
     return stb
 
 
-    print('packet num:', len(data))
-
+def get_vector(data) -> list:
     length_list = [d['length'] for d in data]
     # pld = get_pld(length_list, split_num=50)
     pld_stb = get_pld_stb(length_list, split_num=50)
     length_sum = get_length_sum(length_list)
 
-    print()
-    input()
     duration_list = [d['duration'] for d in data]
     duration_std = get_duration_std(duration_list)
     duration_avg = get_duration_avg(duration_list)
@@ -116,6 +113,15 @@ def get_pld_stb(data, split_num=50):
     bandwidth_list = [(d['time_delta'], d['length']) for d in data]
     bandwidth_std = get_bandwidth_std(bandwidth_list)
 
+    Vector = namedtuple('Vector', ['pld_stb',
+                                   'bandwidth_std',
+                                   'duration_std',
+                                   'duration_avg'])
+
+    vector = Vector(pld_stb, bandwidth_std, duration_std, duration_avg)
+    print(vector)
+    input()
+    return vector
 
 def make_data_list(path_list) -> list:
     data_list = []

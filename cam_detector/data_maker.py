@@ -138,15 +138,26 @@ def get_vector(data) -> list:
     bandwidth_list = [(d['time_delta'], d['length']) for d in data]
     bandwidth_std = get_bandwidth_std(bandwidth_list)
 
-    Vector = namedtuple('Vector', ['pld_stb',
+    Vector = namedtuple('Vector', ['pld_stat_stb',
+                                   'pld_stat_stb_with_cdf',
+                                   'pld_pval_stb',
+                                   'pld_pval_stb_with_cdf',
                                    'bandwidth_std',
                                    'duration_std',
                                    'duration_avg'])
 
-    vector = Vector(pld_stb, bandwidth_std, duration_std, duration_avg)
-    print(vector)
-    input()
+    vector = Vector(pld_stat_stb, pld_stat_stb_with_cdf,
+                    pld_pval_stb, pld_pval_stb_with_cdf,
+                    bandwidth_std, duration_std, duration_avg)
+
+    # print(vector)
+    # print(pld_stat_stb, pld_stat_stb_with_cdf)
+    # print(pld_pval_stb, pld_pval_stb_with_cdf)
+    # print(bandwidth_std, duration_std, duration_avg)
+
+    # input()
     return vector
+
 
 def make_data_list(path_list) -> list:
     data_list = []

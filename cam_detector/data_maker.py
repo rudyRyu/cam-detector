@@ -148,17 +148,21 @@ def get_vector(data) -> list:
     bandwidth_std = get_bandwidth_std(bandwidth_list)
     bandwidth_avg = get_bandwidth_avg(bandwidth_list)
 
-    Vector = namedtuple('Vector', ['pld_stat_stb',
+    Vector = namedtuple('Vector', ['length_avg',
+                                   'pld_stat_stb',
                                    'pld_stat_stb_with_cdf',
                                    'pld_pval_stb',
                                    'pld_pval_stb_with_cdf',
-                                   'bandwidth_std',
                                    'duration_std',
-                                   'duration_avg'])
+                                   'duration_avg',
+                                   'bandwidth_std',
+                                   'bandwidth_avg'])
 
-    vector = Vector(pld_stat_stb, pld_stat_stb_with_cdf,
+    vector = Vector(length_avg,
+                    pld_stat_stb, pld_stat_stb_with_cdf,
                     pld_pval_stb, pld_pval_stb_with_cdf,
-                    bandwidth_std, duration_std, duration_avg)
+                    duration_std, duration_avg,
+                    bandwidth_std, bandwidth_avg)
 
     # print(vector)
     # print(pld_stat_stb, pld_stat_stb_with_cdf)

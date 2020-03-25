@@ -127,8 +127,8 @@ def get_duration_avg(data):
     return np.mean(data)
 
 
-def get_length_sum(data):
-    return sum(data)
+def get_length_avg(data):
+    return np.mean(data)
 
 
 def get_vector(data) -> list:
@@ -138,7 +138,7 @@ def get_vector(data) -> list:
     pld_stat_stb_with_cdf, pld_pval_stb_with_cdf = get_pld_stb_with_cdf(
                                                         length_list,
                                                         split_num=SPLIT_NUM)
-    length_sum = get_length_sum(length_list)
+    length_avg = get_length_avg(length_list)
 
     duration_list = [d['duration'] for d in data]
     duration_std = get_duration_std(duration_list)

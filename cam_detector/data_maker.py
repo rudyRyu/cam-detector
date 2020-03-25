@@ -104,8 +104,8 @@ def get_pld_stb_with_cdf(data, split_num=50):
 def get_bandwidth_std(data):
     bandwidth_list = []
     for time_delta, length in data[1:]:
-        bps = (1./time_delta)*(length/1024*8)
-        bandwidth_list.append(bps)
+        kbps = (1./time_delta)*(length/1024*8)
+        bandwidth_list.append(kbps)
 
     return np.std(bandwidth_list)
 

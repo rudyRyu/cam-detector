@@ -9,6 +9,16 @@ from data_maker import make_data_list
 plt.rcParams.update({'figure.max_open_warning': 30})
 
 
+def get_dict_from_data_list(data_list):
+
+    data_dict = defaultdict(lambda: [])
+    for vector in pos_data_list:
+        for field in vector._fields:
+            data_dict[field].append(getattr(vector, field))
+
+    return data_dict
+
+
 def get_max_from_lists(*lists):
     flatten = np.concatenate(lists).ravel()
     max_value = np.max(flatten)
@@ -33,7 +43,7 @@ def histogram(i, data_list, title, *, x_lim=[], y_lim=[]):
 
 
 if __name__ == '__main__':
-    with open('pos_paths.txt', 'r') as f:
+    with open('data_path/pos_nm_up_paths.txt', 'r') as f:
         pos_path_list = f.read().splitlines()
     pos_data_list = make_data_list(pos_path_list)
 
@@ -46,6 +56,7 @@ if __name__ == '__main__':
     pos_bandwidth_std_list = []
     pos_bandwidth_avg_list = []
     pos_length_avg_list = []
+    pos_bandwidth2_list = []
 
     for vector in pos_data_list:
         pos_duration_avg_list.append(vector.duration_avg)
@@ -57,9 +68,10 @@ if __name__ == '__main__':
         pos_bandwidth_std_list.append(vector.bandwidth_std)
         pos_bandwidth_avg_list.append(vector.bandwidth_avg)
         pos_length_avg_list.append(vector.length_avg)
+        pos_bandwidth2_list.append(vector.bandwidth2)
 
 
-    with open('neg_paths.txt', 'r') as f:
+    with open('data_path/neg_paths.txt', 'r') as f:
         neg_path_list = f.read().splitlines()
     neg_data_list = make_data_list(neg_path_list)
 
@@ -72,6 +84,7 @@ if __name__ == '__main__':
     neg_bandwidth_std_list = []
     neg_bandwidth_avg_list = []
     neg_length_avg_list = []
+    neg_bandwidth2_list = []
 
     for vector in neg_data_list:
         neg_duration_avg_list.append(vector.duration_avg)
@@ -83,9 +96,10 @@ if __name__ == '__main__':
         neg_bandwidth_std_list.append(vector.bandwidth_std)
         neg_bandwidth_avg_list.append(vector.bandwidth_avg)
         neg_length_avg_list.append(vector.length_avg)
+        neg_bandwidth2_list.append(vector.bandwidth2)
 
 
-    with open('neg_dummy_paths.txt', 'r') as f:
+    with open('data_path/neg_dummy_paths.txt', 'r') as f:
         neg_dummy_path_list = f.read().splitlines()
     neg_dummy_data_list = make_data_list(neg_dummy_path_list)
 
@@ -98,6 +112,7 @@ if __name__ == '__main__':
     neg_dummy_bandwidth_std_list = []
     neg_dummy_bandwidth_avg_list = []
     neg_dummy_length_avg_list = []
+    neg_dummy_bandwidth2_list = []
 
     for vector in neg_dummy_data_list:
         neg_dummy_duration_avg_list.append(vector.duration_avg)
@@ -109,6 +124,7 @@ if __name__ == '__main__':
         neg_dummy_bandwidth_std_list.append(vector.bandwidth_std)
         neg_dummy_bandwidth_avg_list.append(vector.bandwidth_avg)
         neg_dummy_length_avg_list.append(vector.length_avg)
+        neg_dummy_bandwidth2_list.append(vector.bandwidth2)
 
 
     print(len(pos_data_list))
@@ -160,5 +176,9 @@ if __name__ == '__main__':
     n9 = histogram(26, neg_length_avg_list, 'neg_length_avg_list', x_lim=[0, m9])
     d9 = histogram(27, neg_dummy_length_avg_list, 'neg_dummy_length_avg_list', x_lim=[0, m9])
 
+    m10 = get_max_from_lists(pos_bandwidth2_list, neg_bandwidth2_list, neg_dummy_bandwidth2_list)
+    p10 = histogram(28, pos_bandwidth2_list, 'pos_bandwidth2_list', x_lim=[0, m10])
+    n10 = histogram(29, neg_bandwidth2_list, 'neg_bandwidth2_list', x_lim=[0, m10])
+    d10 = histogram(30, neg_dummy_bandwidth2_list, 'neg_dummy_bandwidth2_list', x_lim=[0, m10])
 
     plt.show()

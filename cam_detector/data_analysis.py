@@ -42,6 +42,22 @@ def histogram(i, data_list, title, *, x_lim=[], y_lim=[]):
     return f
 
 
+def make_histogram(*data_dicts):
+    i = 1
+    for key in data_dicts[0].keys():
+        if key == 'name':
+            continue
+
+        feature_lists = []
+        for data_dict in data_dicts:
+            feature_lists.append((data_dict[key], data_dict['name']))
+
+        m = get_max_from_lists(*[f[0] for f in feature_lists])
+        for f in feature_lists:
+            histogram(i, f[0], f'{f[1]}_{key}', x_lim=[0, m])
+            i += 1
+
+    plt.show()
 if __name__ == '__main__':
     with open('data_path/pos_nm_up_paths.txt', 'r') as f:
         pos_path_list = f.read().splitlines()

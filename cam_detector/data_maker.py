@@ -119,6 +119,15 @@ def get_bandwidth_avg(data):
     return np.mean(bandwidth_list)
 
 
+def get_flow_bandwidth(data):
+    bandwidth_list = []
+    time_difference = data[-1][0] - data[0][0]
+    length_sum = sum([d[1] for d in data])
+    bandwidth_kbps = (1./time_difference)*(length_sum/1024*8)
+
+    return bandwidth_kbps
+
+
 def get_duration_std(data):
     return np.std(data)
 
@@ -148,6 +157,9 @@ def get_vector(data) -> list:
     bandwidth_std = get_bandwidth_std(bandwidth_list)
     bandwidth_avg = get_bandwidth_avg(bandwidth_list)
 
+    flow_bandwidth_list= [(d['time_relative'], d['length']) for d in data]
+    flow_bandwidth = get_flow_bandwidth(flow_bandwidth_list)
+
     Vector = namedtuple('Vector', ['length_avg',
                                    'pld_stat_stb',
                                    'pld_stat_stb_with_cdf',
@@ -156,13 +168,15 @@ def get_vector(data) -> list:
                                    'duration_std',
                                    'duration_avg',
                                    'bandwidth_std',
-                                   'bandwidth_avg'])
+                                   'bandwidth_avg',
+                                   'flow_bandwidth'])
+
 
     vector = Vector(length_avg,
                     pld_stat_stb, pld_stat_stb_with_cdf,
                     pld_pval_stb, pld_pval_stb_with_cdf,
                     duration_std, duration_avg,
-                    bandwidth_std, bandwidth_avg)
+                    bandwidth_std, bandwidth_avg, flow_bandwidth)
 
     # print(vector)
     # print(pld_stat_stb, pld_stat_stb_with_cdf)

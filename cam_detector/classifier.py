@@ -120,8 +120,21 @@ if __name__ == '__main__':
                                                 normalize=True,
                                                 is_train_data=False)
 
+    model = build_model()
 
+    es = EarlyStopping(monitor='val_accuracy',
+                       mode='max',
+                       verbose=1,
+                       patience=30)
 
+    model.fit(x_train, y_train, epochs=300,
+                                batch_size=128,
+                                validation_data=(x_val, y_val),
+                                verbose=1,
+                                callbacks=[es],
+                                shuffle=True)
+
+    results = model.evaluate(x_test, y_test, batch_size=128)
 
 
 

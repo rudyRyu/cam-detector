@@ -48,7 +48,12 @@ def get_data():
     x_data = x_pos + x_neg
     y_data = y_pos + y_neg
 
-    x_data = np.array(x_data, dtype=np.float32)
+    if len(x_data) != len(y_data):
+        raise ValueError
+
+    return x_data, y_data
+
+
     if normalize:
         normed_data_list = []
         NormParam = namedtuple('NormParam', 'max, min')

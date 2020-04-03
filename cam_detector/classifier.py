@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 
 from data_maker import make_data_list
 
+
+norm_params = {}
 def build_model():
     model = Sequential()
     model.add(Dense(64, activation='relu', input_shape=(10,)))
@@ -37,6 +39,29 @@ def get_data():
     y_data = y_pos + y_neg
 
     x_data = np.array(x_data, dtype=np.float32)
+    if normalize:
+        normed_data_list = []
+        NormParam = namedtuple('NormParam', 'max, min')
+        for field in x_data[0]._fields:
+            data_list = []
+            for x in x_data:
+                data_list.append(getattr(x, field))
+
+            max_ = max(data_list)
+            min_ = min(data_list)
+
+            norm_params[field] = NormParam(max_, min_)
+
+            normed = []
+            for data in data_list:
+                normed.append((data-min_)/(max_-min_))
+
+            normed_data_list.append(normed)
+
+        x_data = np.array(normed_data_list).transpose()
+
+    else:
+        x_data = np.array(x_data, dtype=np.float32)
     y_data = np.array(y_data, dtype=np.float32)
 
     return x_data, y_data

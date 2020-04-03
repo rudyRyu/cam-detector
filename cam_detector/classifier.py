@@ -54,30 +54,48 @@ def get_data():
     return x_data, y_data
 
 
+def preprocess(x_data, y_data, *, normalize, shuffle, is_train_data):
     if normalize:
         normed_data_list = []
         NormParam = namedtuple('NormParam', 'max, min')
         for field in x_data[0]._fields:
+            print(field)
             data_list = []
             for x in x_data:
                 data_list.append(getattr(x, field))
 
-            max_ = max(data_list)
-            min_ = min(data_list)
+            if is_train_data:
+                max_ = max(data_list)
+                min_ = min(data_list)
+                norm_params[field] = NormParam(max_, min_)
 
-            norm_params[field] = NormParam(max_, min_)
+                normed = []
+                for data in data_list:
+                    normed.append((data-min_)/(max_-min_))
 
-            normed = []
-            for data in data_list:
-                normed.append((data-min_)/(max_-min_))
+            else:
+                max_ = norm_params[field].max
+                min_ = norm_params[field].min
+
+                normed = []
+                for data in data_list:
+                    normed.append((data-min_)/(max_-min_))
 
             normed_data_list.append(normed)
 
-        x_data = np.array(normed_data_list).transpose()
+        x_data = np.array(normed_data_list, dtype=np.float32).transpose()
 
     else:
         x_data = np.array(x_data, dtype=np.float32)
+
     y_data = np.array(y_data, dtype=np.float32)
+
+    if shuffle:
+        indices = np.arange(x_data.shape[0])
+        np.random.shuffle(indices)
+
+        x_data = x_data[indices]
+        y_data = y_data[indices]
 
     return x_data, y_data
 

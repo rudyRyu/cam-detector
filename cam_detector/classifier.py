@@ -108,6 +108,17 @@ if __name__ == '__main__':
     x_train, x_val, y_train, y_val = train_test_split(x_train, y_train,
                                                                test_size=0.2)
 
+    x_train, y_train = preprocess(x_train, y_train, shuffle=True,
+                                                    normalize=True,
+                                                    is_train_data=True)
+
+    x_val, y_val = preprocess(x_val, y_val, shuffle=False,
+                                            normalize=True,
+                                            is_train_data=False)
+
+    x_test, y_test = preprocess(x_test, y_test, shuffle=False,
+                                                normalize=True,
+                                                is_train_data=False)
 
 
 

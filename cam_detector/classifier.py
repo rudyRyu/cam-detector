@@ -8,14 +8,24 @@ from data_maker import make_data_list
 
 
 norm_params = {}
+
 def build_model():
     model = Sequential()
-    model.add(Dense(64, activation='relu', input_shape=(10,)))
-    model.add(Dense(28, activation='relu'))
-    model.add(Dense(2, activation='softmax'))
+    model.add(Dense(8, activation='relu', input_shape=(10,)))
+    model.add(BatchNormalization())
 
-    model.compile(optimizer='SGD', loss='binary_crossentropy',
-                                   metrics=['accuracy'])
+    model.add(Dense(16, activation='relu'))
+    model.add(BatchNormalization())
+
+    model.add(Dense(24, activation='relu'))
+    model.add(BatchNormalization())
+
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(optimizer=Adam(lr=0.001),
+                  #optimizer=SGD(lr=0.01, momentum=0.9, decay=0.01),
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
 
     return model
 

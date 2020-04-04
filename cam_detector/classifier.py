@@ -140,6 +140,13 @@ if __name__ == '__main__':
 
     results = model.evaluate(x_test, y_test, batch_size=128)
 
+    print('Total: ', len(x))
+    print('  Train:', np.count_nonzero(y_train == 1),
+                      np.count_nonzero(y_train == 0))
+    print('  Valid:', np.count_nonzero(y_val == 1),
+                      np.count_nonzero(y_val == 0))
+    print('   Test:', np.count_nonzero(y_test == 1),
+                      np.count_nonzero(y_test == 0))
 
 
 

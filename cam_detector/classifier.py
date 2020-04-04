@@ -1,7 +1,11 @@
+from collections import defaultdict, namedtuple
+from pprint import pprint
 
 import numpy as np
+from keras.callbacks.callbacks import EarlyStopping
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.optimizers import Adam, SGD, Adagrad, Adadelta, RMSprop, Nadam, Adamax
+from keras.layers import Dense, Activation, Dropout, BatchNormalization
 from sklearn.model_selection import train_test_split
 
 from data_maker import make_data_list

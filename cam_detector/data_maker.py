@@ -23,9 +23,9 @@ from scipy.stats import norm, ks_2samp
 from pkl_maker import read_pkl
 
 
-MIN_DATA_SIZE = 1000
-STEP_DIVISION = 2
-
+MIN_DATA_SIZE = 300
+SPLIT_NUM = 50
+STEP_DIVISION = 1
 
 def get_cdf1(data):
     hist, bin_edges = np.histogram(data, bins=20, density=True)
@@ -42,7 +42,7 @@ def get_cdf2(data):
 
     # Use the histogram function to bin the data
     counts, bin_edges = np.histogram(data, bins=bins, density=False)
-    counts=counts.astype(float)/data_size
+    counts = counts.astype(float)/data_size
 
     # Find the cdf
     cdf = np.cumsum(counts)
@@ -206,6 +206,7 @@ def make_data_list(path_list) -> list:
                         data_list.append(vector)
 
     return data_list
+
 
 if __name__ == '__main__':
     with open('pos_paths.txt', 'r') as f:

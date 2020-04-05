@@ -33,6 +33,7 @@ def build_model():
 
     return model
 
+
 def get_data():
     with open('data_path/pos_nm_up_paths.txt', 'r') as f:
         pos_path_list = f.read().splitlines()
@@ -63,7 +64,6 @@ def preprocess(x_data, y_data, *, normalize, shuffle, is_train_data):
         normed_data_list = []
         NormParam = namedtuple('NormParam', 'max, min')
         for field in x_data[0]._fields:
-            print(field)
             data_list = []
             for x in x_data:
                 data_list.append(getattr(x, field))
@@ -129,16 +129,14 @@ if __name__ == '__main__':
     es = EarlyStopping(monitor='val_accuracy',
                        mode='max',
                        verbose=1,
-                       patience=30)
+                       patience=50)
 
-    model.fit(x_train, y_train, epochs=300,
+    model.fit(x_train, y_train, epochs=5000,
                                 batch_size=128,
                                 validation_data=(x_val, y_val),
                                 verbose=1,
-                                callbacks=[es],
+                                # callbacks=[es],
                                 shuffle=True)
-
-    results = model.evaluate(x_test, y_test, batch_size=128)
 
     print('Total: ', len(x))
     print('  Train:', np.count_nonzero(y_train == 1),
@@ -148,5 +146,7 @@ if __name__ == '__main__':
     print('   Test:', np.count_nonzero(y_test == 1),
                       np.count_nonzero(y_test == 0))
 
+    results = model.evaluate(x_test, y_test, batch_size=128)
 
+    print(results)
 

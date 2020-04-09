@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 from collections import defaultdict, namedtuple
 from pprint import pprint
 
@@ -7,8 +10,10 @@ from keras.models import Sequential
 from keras.optimizers import Adam, SGD, Adagrad, Adadelta, RMSprop, Nadam, Adamax
 from keras.layers import Dense, Activation, Dropout, BatchNormalization
 from sklearn.model_selection import train_test_split
+from tabulate import tabulate
 
 from data_maker import make_data_list
+from logger import log
 
 
 norm_params = {}
@@ -106,6 +111,7 @@ def preprocess(x_data, y_data, *, normalize, shuffle, is_train_data):
 
 if __name__ == '__main__':
 
+    log.info('Load dataset ...')
     x, y = get_data()
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
@@ -124,29 +130,47 @@ if __name__ == '__main__':
                                                 normalize=True,
                                                 is_train_data=False)
 
+    log.info('Build model ...')
     model = build_model()
 
     es = EarlyStopping(monitor='val_accuracy',
                        mode='max',
                        verbose=1,
-                       patience=50)
+                       patience=70)
 
-    model.fit(x_train, y_train, epochs=5000,
-                                batch_size=128,
-                                validation_data=(x_val, y_val),
-                                verbose=1,
-                                # callbacks=[es],
-                                shuffle=True)
+    log.info('Train model ...')
+    print()
+    history = model.fit(x_train, y_train, epochs=300,
+                                          batch_size=128,
+                                          validation_data=(x_val, y_val),
+                                          verbose=1,
+                                          callbacks=[es],
+                                          shuffle=True)
 
-    print('Total: ', len(x))
-    print('  Train:', np.count_nonzero(y_train == 1),
-                      np.count_nonzero(y_train == 0))
-    print('  Valid:', np.count_nonzero(y_val == 1),
-                      np.count_nonzero(y_val == 0))
-    print('   Test:', np.count_nonzero(y_test == 1),
-                      np.count_nonzero(y_test == 0))
+    print()
+    log.info('Evaluate model ...')
+    results = model.evaluate(x_test, y_test, batch_size=128, verbose=0)
 
-    results = model.evaluate(x_test, y_test, batch_size=128)
+    print()
+    log.info('----------------- Summary -----------------')
+    log.info('Data info')
+    di_headers = ['Dataset', 'Total', 'Pos', 'Neg']
+    di_bodies = [('Train', len(y_train), np.count_nonzero(y_train == 1), np.count_nonzero(y_train == 0)),
+                 ('Valid', len(y_val), np.count_nonzero(y_val == 1), np.count_nonzero(y_val == 0)),
+                 ('Test', len(y_test), np.count_nonzero(y_test == 1), np.count_nonzero(y_test == 0)),
+                 ('All', len(y), y.count(1), y.count(0))]
 
-    print(results)
+    print(tabulate(di_bodies, headers=di_headers, tablefmt='grid'))
+    print()
+
+    log.info('Result')
+    re_headers = ['Dataset', 'Accuracy']
+    re_bodies = [('Train', history.history['accuracy'][-1]),
+                 ('Valid', history.history['val_accuracy'][-1]),
+                 ('Test', results[1])]
+
+    print(tabulate(re_bodies, headers=re_headers, tablefmt='grid'))
+
+
+
 

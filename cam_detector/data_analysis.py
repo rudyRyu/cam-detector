@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.ticker import PercentFormatter
 
 from data_maker import make_data_list
-
+from logger import log
 
 plt.rcParams.update({'figure.max_open_warning': 50})
 

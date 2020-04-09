@@ -20,12 +20,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm, ks_2samp
 
+from logger import log
 from pkl_maker import read_pkl
 
 
 MIN_DATA_SIZE = 300
 SPLIT_NUM = 50
 STEP_DIVISION = 1
+
 
 def get_cdf1(data):
     hist, bin_edges = np.histogram(data, bins=20, density=True)

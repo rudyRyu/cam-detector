@@ -1,13 +1,14 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+import pickle
 from collections import defaultdict, namedtuple
 from pprint import pprint
 
 import numpy as np
-from keras.callbacks.callbacks import EarlyStopping
+from keras.callbacks.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import Sequential
-from keras.optimizers import Adam, SGD, Adagrad, Adadelta, RMSprop, Nadam, Adamax
+from keras.optimizers import Adam, SGD, RMSprop
 from keras.layers import Dense, Activation, Dropout, BatchNormalization
 from sklearn.model_selection import train_test_split
 from tabulate import tabulate
@@ -16,7 +17,7 @@ from data_maker import make_data_list
 from logger import log
 
 
-norm_params = {}
+NormParam = namedtuple('NormParam', 'max, min')
 
 def build_model():
     model = Sequential()
@@ -64,10 +65,31 @@ def get_data():
     return x_data, y_data
 
 
-def preprocess(x_data, y_data, *, normalize, shuffle, is_train_data):
+def save_norm_params(norm_params, path):
+    with open(path, 'w') as f:
+        for key, norm_param in norm_params.items():
+            f.write(f'{key}\t{norm_param.max}\t{norm_param.min}\n')
+
+
+def load_norm_params(path):
+    norm_params = {}
+
+    with open(path, 'r') as f:
+        norm_param_list = f.read().splitlines()
+
+    for norm_param in norm_param_list:
+        field, max_, min_ = norm_param.split('\t')
+        norm_params[field] = NormParam(float(max_), float(min_))
+
+    return norm_params
+
+
+def preprocess(x_data, y_data=None, *, normalize,
+                                       shuffle,
+                                       is_train_data,
+                                       norm_params):
     if normalize:
         normed_data_list = []
-        NormParam = namedtuple('NormParam', 'max, min')
         for field in x_data[0]._fields:
             data_list = []
             for x in x_data:
@@ -97,14 +119,16 @@ def preprocess(x_data, y_data, *, normalize, shuffle, is_train_data):
     else:
         x_data = np.array(x_data, dtype=np.float32)
 
-    y_data = np.array(y_data, dtype=np.float32)
+    if y_data is not None:
+        y_data = np.array(y_data, dtype=np.float32)
 
     if shuffle:
         indices = np.arange(x_data.shape[0])
         np.random.shuffle(indices)
 
         x_data = x_data[indices]
-        y_data = y_data[indices]
+        if y_data is not None:
+            y_data = y_data[indices]
 
     return x_data, y_data
 
@@ -118,17 +142,22 @@ if __name__ == '__main__':
     x_train, x_val, y_train, y_val = train_test_split(x_train, y_train,
                                                                test_size=0.2)
 
+    norm_params = {}
+
     x_train, y_train = preprocess(x_train, y_train, shuffle=True,
                                                     normalize=True,
-                                                    is_train_data=True)
+                                                    is_train_data=True,
+                                                    norm_params=norm_params)
 
     x_val, y_val = preprocess(x_val, y_val, shuffle=False,
                                             normalize=True,
-                                            is_train_data=False)
+                                            is_train_data=False,
+                                            norm_params=norm_params)
 
     x_test, y_test = preprocess(x_test, y_test, shuffle=False,
                                                 normalize=True,
-                                                is_train_data=False)
+                                                is_train_data=False,
+                                                norm_params=norm_params)
 
     log.info('Build model ...')
     model = build_model()
@@ -138,13 +167,19 @@ if __name__ == '__main__':
                        verbose=1,
                        patience=70)
 
+    save = ModelCheckpoint('best_model.hdf5',
+                           monitor='val_accuracy',
+                           mode='max',
+                           verbose=0,
+                           save_best_only=True
+                           )
     log.info('Train model ...')
     print()
     history = model.fit(x_train, y_train, epochs=300,
                                           batch_size=128,
                                           validation_data=(x_val, y_val),
                                           verbose=1,
-                                          callbacks=[es],
+                                          callbacks=[es, save],
                                           shuffle=True)
 
     print()
@@ -172,5 +207,7 @@ if __name__ == '__main__':
     print(tabulate(re_bodies, headers=re_headers, tablefmt='grid'))
 
 
-
-
+    save_model = True
+    if save_model:
+        model.save('model.h5')
+        save_norm_params(norm_params, 'norm_params.txt')

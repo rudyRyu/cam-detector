@@ -209,6 +209,23 @@ def make_data_list(path_list) -> list:
 
     return data_list
 
+def make_data_list_from_flow(flow) -> list:
+    data_list = []
+
+    for src, src_value in flow.items():
+        for dst, dst_value in src_value.items():
+            for fc, data in dst_value.items():
+                if len(data) < MIN_DATA_SIZE:
+                    continue
+
+                stop_len = len(data)-MIN_DATA_SIZE
+                step_size = MIN_DATA_SIZE//STEP_DIVISION
+                for i in range(0, stop_len, step_size):
+                    vector = get_vector(data[i:i+MIN_DATA_SIZE])
+                    data_list.append(vector)
+
+    return data_list
+
 
 if __name__ == '__main__':
     with open('pos_paths.txt', 'r') as f:

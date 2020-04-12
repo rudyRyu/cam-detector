@@ -34,7 +34,7 @@ $ python3 pkl_maker.py -p ../data/dummy/test_file.pcap -a neg_test.txt -s
 // 명령어
 $ python3 data_analysis.py
 
-// 데이터 분석의 경우 data_analysis.py 모듈의 main 부분에서 직접 경로 설정을 해주어야함
+// data_analysis.py 모듈의 main 부분에서 직접 경로 설정을 해주어야함
 if __name__ == '__main__':
     with open('pos_test.txt', 'r') as f:
       ...
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 // 명령어
 $ python3 classifier.py
 
-// 학습의 경우 classifier.py 모듈의 get_data() 함수 부분에서 직접 경로 설정을 해주어야함
+// classifier.py 모듈의 get_data() 함수 부분에서 직접 경로 설정을 해주어야함
 def get_data():
     with open('pos_test.txt', 'r') as f:
       ...
@@ -56,4 +56,21 @@ def get_data():
     with open('neg_test.txt', 'r') as f:
       ...
 
+```
+
+### 4. Prediction
+```
+// 명령어
+$ python predict.py
+
+// predict.py 모듈의 main 부분에서 weight path, cap_path, param_path 직접 설정
+if __name__ == '__main__':
+	...
+
+    model.load_weights('saved_models/weights.hdf5')
+    cap_path = '...../camera.pcap'
+
+    ...
+
+    norm_params = load_norm_params('norm_params.txt')
 ```

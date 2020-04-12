@@ -3,6 +3,8 @@ data/
 .DS_Store
 data_path/
 test_code/
+
+saved_models/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

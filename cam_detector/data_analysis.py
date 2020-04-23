@@ -91,6 +91,7 @@ if __name__ == '__main__':
         min_data_size = conf["data_analysis"]["data_options"]["min_data_size"]
         split_num = conf["data_analysis"]["data_options"]["split_num_on_pld"]
         step_size = conf["data_analysis"]["data_options"]["step_size"]
+        features_to_use = conf["data_analysis"]["features"]
 
         data_dict_list = []
         for name, path in conf["data_analysis"]["dataset"]:
@@ -100,7 +101,8 @@ if __name__ == '__main__':
             data_list = make_data_list(path_list,
                                        min_data_size=min_data_size,
                                        split_num_on_pld=split_num,
-                                       step_size=step_size)
+                                       step_size=step_size,
+                                       features_to_use=features_to_use)
 
 
             data_dict = get_dict_from_data_list(data_list, name)

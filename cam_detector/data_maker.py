@@ -145,56 +145,97 @@ def get_length_avg(data):
 def get_vector(data, *, features_to_use=[],
                         split_num_on_pld=50) -> list:
 
+    vector_list = []
+    vector_name_list = []
+    if any(['length_avg' in features_to_use,
+            'pld_stat_stb' in features_to_use,
+            'pld_pval_stb' in features_to_use,
+            'pld_stat_stb_with_cdf' in features_to_use,
+            'pld_pval_stb_with_cdf' in features_to_use]):
 
-    length_list = [d['length'] for d in data]
-    pld_stat_stb, pld_pval_stb = get_pld_stb(length_list,
-                                             split_num=split_num_on_pld)
-    pld_stat_stb_with_cdf, pld_pval_stb_with_cdf = get_pld_stb_with_cdf(
-                                                    length_list,
-                                                    split_num=split_num_on_pld)
-    length_avg = get_length_avg(length_list)
+        length_list = [d['length'] for d in data]
 
-    duration_list = [d['duration'] for d in data]
-    duration_std = get_duration_std(duration_list)
-    duration_avg = get_duration_avg(duration_list)
+        if 'length_avg' in features_to_use:
+            length_avg = get_length_avg(length_list)
+            vector_list.append(length_avg)
+            vector_name_list.append('length_avg')
 
-    bandwidth_list = [(d['time_delta'], d['length']) for d in data]
-    bandwidth_std = get_bandwidth_std(bandwidth_list)
-    bandwidth_avg = get_bandwidth_avg(bandwidth_list)
+        if any(['pld_stat_stb' in features_to_use,
+                'pld_pval_stb' in features_to_use]):
 
-    flow_bandwidth_list= [(d['time_relative'], d['length']) for d in data]
-    flow_bandwidth = get_flow_bandwidth(flow_bandwidth_list)
+            pld_stat_stb, pld_pval_stb = get_pld_stb(
+                                                length_list,
+                                                split_num=split_num_on_pld)
 
-    Vector = namedtuple('Vector', ['length_avg',
-                                   'pld_stat_stb',
-                                   'pld_stat_stb_with_cdf',
-                                   'pld_pval_stb',
-                                   'pld_pval_stb_with_cdf',
-                                   'duration_std',
-                                   'duration_avg',
-                                   'bandwidth_std',
-                                   'bandwidth_avg',
-                                   'flow_bandwidth'])
+            if 'pld_stat_stb' in features_to_use:
+                vector_list.append(pld_stat_stb)
+                vector_name_list.append('pld_stat_stb')
 
+            if 'pld_pval_stb' in features_to_use:
+                vector_list.append(pld_pval_stb)
+                vector_name_list.append('pld_pval_stb')
 
-    vector = Vector(length_avg,
-                    pld_stat_stb, pld_stat_stb_with_cdf,
-                    pld_pval_stb, pld_pval_stb_with_cdf,
-                    duration_std, duration_avg,
-                    bandwidth_std, bandwidth_avg, flow_bandwidth)
+        if any(['pld_stat_stb_with_cdf' in features_to_use,
+                'pld_pval_stb_with_cdf' in features_to_use]):
 
-    # print(vector)
-    # print(pld_stat_stb, pld_stat_stb_with_cdf)
-    # print(pld_pval_stb, pld_pval_stb_with_cdf)
-    # print(bandwidth_std, duration_std, duration_avg)
+            pld_stat_stb_with_cdf, pld_pval_stb_with_cdf = \
+                            get_pld_stb_with_cdf(length_list,
+                                                 split_num=split_num_on_pld)
 
-    # input()
+            if 'pld_stat_stb_with_cdf' in features_to_use:
+                vector_list.append(pld_stat_stb_with_cdf)
+                vector_name_list.append('pld_stat_stb_with_cdf')
+
+            if 'pld_pval_stb_with_cdf' in features_to_use:
+                vector_list.append(pld_pval_stb_with_cdf)
+                vector_name_list.append('pld_pval_stb_with_cdf')
+
+    if any(['duration_std' in features_to_use,
+            'duration_avg' in features_to_use]):
+
+        duration_list = [d['duration'] for d in data]
+
+        if 'duration_std' in features_to_use:
+            duration_std = get_duration_std(duration_list)
+            vector_list.append(duration_std)
+            vector_name_list.append('duration_std')
+
+        if 'duration_avg' in features_to_use:
+            duration_avg = get_duration_avg(duration_list)
+            vector_list.append(duration_avg)
+            vector_name_list.append('duration_avg')
+
+    if any(['bandwidth_std' in features_to_use,
+            'bandwidth_avg' in features_to_use]):
+
+        bandwidth_list = [(d['time_delta'], d['length']) for d in data]
+
+        if 'bandwidth_std' in features_to_use:
+            bandwidth_std = get_bandwidth_std(bandwidth_list)
+            vector_list.append(bandwidth_std)
+            vector_name_list.append('bandwidth_std')
+
+        if 'bandwidth_avg' in features_to_use:
+            bandwidth_avg = get_bandwidth_avg(bandwidth_list)
+            vector_list.append(bandwidth_avg)
+            vector_name_list.append('bandwidth_avg')
+
+    if 'flow_bandwidth' in features_to_use:
+        flow_bandwidth_list= [(d['time_relative'], d['length']) for d in data]
+        flow_bandwidth = get_flow_bandwidth(flow_bandwidth_list)
+        vector_list.append(flow_bandwidth)
+        vector_name_list.append('flow_bandwidth')
+
+    Vector = namedtuple('Vector', [*vector_name_list])
+
+    vector = Vector(*vector_list)
     return vector
 
 
 def make_data_list(path_list, *, min_data_size=300,
                                  split_num_on_pld=50,
-                                 step_size=300) -> list:
+                                 step_size=300,
+                                 features_to_use=None) -> list:
     data_list = []
     for path in path_list:
         with open(path, 'rb') as fp:
@@ -203,7 +244,8 @@ def make_data_list(path_list, *, min_data_size=300,
         vectors = make_data_list_from_flow(flows,
                                            min_data_size=min_data_size,
                                            split_num_on_pld=split_num_on_pld,
-                                           step_size=step_size)
+                                           step_size=step_size,
+                                           features_to_use=features_to_use)
 
         data_list.extend(vectors)
 
@@ -211,7 +253,8 @@ def make_data_list(path_list, *, min_data_size=300,
 
 def make_data_list_from_flow(flow, *, min_data_size=300,
                                       split_num_on_pld=50,
-                                      step_size=300) -> list:
+                                      step_size=300,
+                                      features_to_use=None) -> list:
     data_list = []
     for src, src_value in flow.items():
         for dst, dst_value in src_value.items():
@@ -222,7 +265,8 @@ def make_data_list_from_flow(flow, *, min_data_size=300,
                 stop_len = len(data)-min_data_size
                 for i in range(0, stop_len, step_size):
                     vector = get_vector(data[i:i+min_data_size],
-                                        split_num_on_pld=split_num_on_pld)
+                                        split_num_on_pld=split_num_on_pld,
+                                        features_to_use=features_to_use)
                     data_list.append(vector)
 
     return data_list

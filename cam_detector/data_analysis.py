@@ -1,3 +1,5 @@
+import argparse
+import json
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -65,23 +67,35 @@ def make_histogram(*data_dicts):
     plt.show()
 
 if __name__ == '__main__':
-    with open('data_path/pos_nm_up_paths.txt', 'r') as f:
-        pos_path_list = f.read().splitlines()
-    pos_data_list = make_data_list(pos_path_list)
-    pos_data_dict = get_dict_from_data_list(pos_data_list, 'pos')
 
-    with open('data_path/neg_paths.txt', 'r') as f:
-        neg_path_list = f.read().splitlines()
-    neg_data_list = make_data_list(neg_path_list)
-    neg_data_dict = get_dict_from_data_list(neg_data_list, 'neg')
+    argparser = argparse.ArgumentParser(description='config')
+    argparser.add_argument(
+        '-c',
+        '--conf',
+        required=True,
+        help='path to a configuration file')
 
-    with open('data_path/neg_dummy_paths.txt', 'r') as f:
-        neg_dummy_path_list = f.read().splitlines()
-    neg_dummy_data_list = make_data_list(neg_dummy_path_list)
-    neg_dummy_data_dict = get_dict_from_data_list(neg_dummy_data_list, 'neg_dummy')
 
-    print(len(pos_data_list))
-    print(len(neg_data_list))
-    print(len(neg_dummy_data_list))
+    args = argparser.parse_args()
+    config_path = args.conf
 
-    make_histogram(pos_data_dict, neg_data_dict, neg_dummy_data_dict)
+    with open(config_path) as config_buffer:
+        conf = json.loads(config_buffer.read())
+
+    if not conf["data_analysis"]["dataset"]:
+        log.info("check dataset")
+
+    else:
+        log.info("data loading ...")
+        data_dict_list = []
+        for name, path in conf["data_analysis"]["dataset"]:
+            with open(path, 'r') as f:
+                path_list = f.read().splitlines()
+
+            data_list = make_data_list(path_list)
+            data_dict = get_dict_from_data_list(data_list, name)
+            data_dict_list.append(data_dict)
+
+            log.info(f"{name}: {len(data_list)}")
+
+        make_histogram(*data_dict_list)

@@ -87,12 +87,22 @@ if __name__ == '__main__':
 
     else:
         log.info("data loading ...")
+
+        min_data_size = conf["data_analysis"]["data_options"]["min_data_size"]
+        split_num = conf["data_analysis"]["data_options"]["split_num_on_pld"]
+        step_size = conf["data_analysis"]["data_options"]["step_size"]
+
         data_dict_list = []
         for name, path in conf["data_analysis"]["dataset"]:
             with open(path, 'r') as f:
                 path_list = f.read().splitlines()
 
-            data_list = make_data_list(path_list)
+            data_list = make_data_list(path_list,
+                                       min_data_size=min_data_size,
+                                       split_num_on_pld=split_num,
+                                       step_size=step_size)
+
+
             data_dict = get_dict_from_data_list(data_list, name)
             data_dict_list.append(data_dict)
 

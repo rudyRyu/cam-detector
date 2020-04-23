@@ -142,13 +142,16 @@ def get_length_avg(data):
     return np.mean(data)
 
 
-def get_vector(data) -> list:
+def get_vector(data, *, features_to_use=[],
+                        split_num_on_pld=50) -> list:
+
+
     length_list = [d['length'] for d in data]
-    # pld = get_pld(length_list, split_num=50)
-    pld_stat_stb, pld_pval_stb = get_pld_stb(length_list, split_num=SPLIT_NUM)
+    pld_stat_stb, pld_pval_stb = get_pld_stb(length_list,
+                                             split_num=split_num_on_pld)
     pld_stat_stb_with_cdf, pld_pval_stb_with_cdf = get_pld_stb_with_cdf(
-                                                        length_list,
-                                                        split_num=SPLIT_NUM)
+                                                    length_list,
+                                                    split_num=split_num_on_pld)
     length_avg = get_length_avg(length_list)
 
     duration_list = [d['duration'] for d in data]
@@ -189,39 +192,37 @@ def get_vector(data) -> list:
     return vector
 
 
-def make_data_list(path_list) -> list:
+def make_data_list(path_list, *, min_data_size=300,
+                                 split_num_on_pld=50,
+                                 step_size=300) -> list:
     data_list = []
     for path in path_list:
         with open(path, 'rb') as fp:
             flows = pickle.load(fp)
 
-        for src, src_value in flows.items():
-            for dst, dst_value in src_value.items():
-                for fc, data in dst_value.items():
-                    if len(data) < MIN_DATA_SIZE:
-                        continue
+        vectors = make_data_list_from_flow(flows,
+                                           min_data_size=min_data_size,
+                                           split_num_on_pld=split_num_on_pld,
+                                           step_size=step_size)
 
-                    stop_len = len(data)-MIN_DATA_SIZE
-                    step_size = MIN_DATA_SIZE//STEP_DIVISION
-                    for i in range(0, stop_len, step_size):
-                        vector = get_vector(data[i:i+MIN_DATA_SIZE])
-                        data_list.append(vector)
+        data_list.extend(vectors)
 
     return data_list
 
-def make_data_list_from_flow(flow) -> list:
+def make_data_list_from_flow(flow, *, min_data_size=300,
+                                      split_num_on_pld=50,
+                                      step_size=300) -> list:
     data_list = []
-
     for src, src_value in flow.items():
         for dst, dst_value in src_value.items():
             for fc, data in dst_value.items():
-                if len(data) < MIN_DATA_SIZE:
+                if len(data) < min_data_size:
                     continue
 
-                stop_len = len(data)-MIN_DATA_SIZE
-                step_size = MIN_DATA_SIZE//STEP_DIVISION
+                stop_len = len(data)-min_data_size
                 for i in range(0, stop_len, step_size):
-                    vector = get_vector(data[i:i+MIN_DATA_SIZE])
+                    vector = get_vector(data[i:i+min_data_size],
+                                        split_num_on_pld=split_num_on_pld)
                     data_list.append(vector)
 
     return data_list

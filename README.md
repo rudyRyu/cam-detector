@@ -1,4 +1,3 @@
-
 # Installation
 
 ### Prerequisites
@@ -11,66 +10,143 @@ Python 3.7+
 pip3 install -r requirements.txt
 ```
 
-# Run
+# How to Use
 ### 1. Convert pcap file to pickle (pcap -> pkl)
+
+ - Configuration (config.json)
 ```
-// option
-[-p PATH] Packet file path (file or directory)
-[-a PATH] File path that saves pkl paths (Append)
-[-s] Whether to save pickle files or not
-[-r] Delete dummy packets (only one pair of src and dst is left)
+{
+      "pkl_maker": {
+          // Packet file path (file or directory)
+          "cap_file_or_directory": "data/camera/hd/",
 
-// command
-$ python3 pkl_maker.py -p [pcap file or directory] -a [where to save pkl paths] [-s] [-r]
+          // Whether to save pickle files or not
+          "save_pkl": true,
 
-// example
-$ python3 pkl_maker.py -p ../data/old/etc -a pos_test.txt -s -r
-$ python3 pkl_maker.py -p ../data/dummy_test -a neg_test.txt -s
-$ python3 pkl_maker.py -p ../data/dummy/test_file.pcap -a neg_test.txt -s
+          // File path that saves pkl paths (Append)
+          "save_annotation_path": "data_path/example.txt",
+
+          // Delete dummy packets (only one pair of src and dst will be left)
+          "remove_dummies": True
+      }
+}
+```
+
+- Run
+```
+$ python3 pkl_maker.py -c config.json
 ```
 
 ### 2. Data analysis
+ - Configuration (config.json)
+ ```
+{
+      "data_maker_options":{
+          // Features to use
+          "features":["length_avg",
+                      "pld_stat_stb",
+                      "pld_pval_stb",
+                      "pld_stat_stb_with_cdf",
+                      "pld_pval_stb_with_cdf",
+                      "duration_std",
+                      "duration_avg"
+                      ],
+
+          // The number of packets that compose one data
+          "min_packet_size": 300,
+
+          // split size on pld features
+          "split_num_on_pld": 50,
+
+          "step_size": 300
+      },
+
+      "data_analysis": {
+          "dataset":[
+              // [data name, data path]
+              ["pos", "data_path/pos_nm_up_paths.txt"],
+              ["neg", "data_path/neg_paths.txt"],
+              ["neg_dummy", "data_path/neg_dummy_paths.txt"]
+          ]
+      }
+}
+ ```
+
+- Run
 ```
-// command
-$ python3 data_analysis.py
-
-// Set data path in main func in data_analysis.py
-if __name__ == '__main__':
-    with open('pos_test.txt', 'r') as f:
-      ...
-
-    with open('neg_test.txt', 'r') as f:
-      ...
+$ python3 data_analysis.py -c config.json
 ```
 
 ### 3. Train
+- Configuration (config.json)
 ```
-// command
-$ python3 classifier.py
+{
+      "data_maker_options":{
+          // same as above
+          ...
+      },
 
-// Set data path in get_data func in classifier.py
-def get_data():
-    with open('pos_test.txt', 'r') as f:
-      ...
+      "train": {
+          "save_model_path": "saved_models/model.json",
+          "save_weight_path": "saved_models/weight.hdf5",
+          "save_norm_param_path": "saved_models/norm_params.txt",
 
-    with open('neg_test.txt', 'r') as f:
-      ...
+          "dataset":{
+              "train":{
+                  "pos": ["data_path/pos_nm_up_paths.txt"],
+                  "neg": ["data_path/neg_paths.txt",
+                          "data_path/neg_dummy_paths.txt"]
+              },
 
+              "test":{
+                  "pos": [],
+                  "neg": []
+              },
+
+              // Split dataset into Train/Validation/Test
+              // If you use your own Test dataset, set test ratio to 0
+              "split_ratio":{
+                  "train": 0.64,
+                  "valid": 0.16,
+                  "test": 0.2
+              }
+          },
+
+          // Train options
+          "fit_options": {
+              "max_epoch": 300,
+              "batch_size": 128,
+              "verbose": 1
+          }
+      },
+}
 ```
 
-### 4. Prediction
+- Run
 ```
-// command
-$ python predict.py
+$ python3 classifier.py -c config.json
+```
 
-// Set weight path, cap_path, param_path in main func in predict.py
-if __name__ == '__main__':
-	...
+### 4. Predict
+- Configuration (config.json)
+```
+{
+      "data_maker_options":{
+          // same as above
+          ...
+      },
 
-    model.load_weights('saved_models/weights.hdf5')
-    cap_path = '...../camera.pcap'
+      "predict": {
+          "load_model_path": "saved_models/model.json",
+          "load_weight_path": "saved_models/weight.hdf5",
+          "load_norm_param_path": "saved_models/norm_params.txt",
 
-    ...
+          "load_cap_path": "data/xwfscan.pcap"
+      }
+}
+```
 
-    norm_params = load_norm_params('norm_params.txt')
+- Run
+```
+$ python3 predict.py -c config.json
 ```

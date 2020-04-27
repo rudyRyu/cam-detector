@@ -68,3 +68,5 @@ def refine_features(features):
             log.info(f" - {feature}")
         log.info("----------------------------")
 
+    return refined_features
+

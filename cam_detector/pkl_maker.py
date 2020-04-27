@@ -1,12 +1,17 @@
 import argparse
+import logging
 import os
 import pickle
 from collections import defaultdict
 from operator import itemgetter
 from pprint import pprint
 
-
 import pyshark
+
+from utils import logger, parse_config
+
+log = logger(name=__name__,
+             level=logging.INFO)
 
 
 def ddict2dict(d):
@@ -61,7 +66,7 @@ def read_cap(path, *, save_pkl=False,
             break
 
         except Exception as e: #pyshark.capture.capture.TSharkCrashException as e:
-            print('exception')
+            log.debug('exception')
             break
 
         else:
@@ -89,7 +94,7 @@ def read_cap(path, *, save_pkl=False,
     try:
         cap.close()
     except:
-        print('close except')
+        log.debug('close except')
 
     if remove_dummies:
         remove_dummy_data(flows)
@@ -102,14 +107,14 @@ def read_cap(path, *, save_pkl=False,
             pickle.dump(flows, fp)
 
         if verbose:
-            print(f'{os.path.split(pkl_path)[-1]} has been created.')
+            log.info(f'{os.path.split(pkl_path)[-1]} has been created.')
 
         if annotate_path:
             with open(annotate_path, 'a') as f:
                 f.write(pkl_path + '\n')
 
             if verbose:
-                print(f'{os.path.split(pkl_path)[-1]} path has been added.\n')
+                log.info(f'{os.path.split(pkl_path)[-1]} path has been added.\n')
 
     return flows
 
@@ -179,49 +184,25 @@ def make_pkl(dir_or_file_path, *, save_pkl=True,
         return 1
 
     else:
-        print('invalid path')
+        log.info('error: invalid path')
         return 0
 
 if __name__ == '__main__':
 
-    argparser = argparse.ArgumentParser(description='pkl maker')
-    argparser.add_argument(
-        '-p',
-        '--path',
-        required=True,
-        help='path to directory or file')
+    conf = parse_config()
 
-    argparser.add_argument(
-        '-a',
-        '--annotate',
-        required=False,
-        default='',
-        help='annotation path. ex) positive.txt')
+    path = conf['pkl_maker']['cap_file_or_directory']
+    annotate = conf['pkl_maker']['save_annotation_path']
+    save_pkl = conf['pkl_maker']['save_pkl']
+    remove_dummies = conf['pkl_maker']['remove_dummies']
 
-    argparser.add_argument(
-        '-s',
-        '--save_pkl',
-        action='store_true',
-        default=False,
-        help='whether to save data with pickle files')
+    log.info('Param info')
+    log.info(f' - path: {path}')
+    log.info(f' - annotate: {annotate}')
+    log.info(f' - save_pkl: {save_pkl}')
+    log.info(f' - remove_dummies: {remove_dummies}\n')
 
-    argparser.add_argument(
-        '-r',
-        '--remove_dummies',
-        action='store_true',
-        default=False,
-        help='whether to remove dummies')
-
-    args = argparser.parse_args()
-    path = args.path
-    annotate = args.annotate
-    save_pkl = args.save_pkl
-    remove_dummies = args.remove_dummies
-
-    print('path:', path)
-    print('annotate:', annotate)
-    print('save_pkl:', save_pkl)
-    print('remove_dummies:', remove_dummies)
+    log.info('Making pickles ...')
 
     count = make_pkl(path, save_pkl=save_pkl,
                            annotate_path=annotate,
@@ -229,6 +210,6 @@ if __name__ == '__main__':
 
     if save_pkl:
         if count > 1:
-            print(f'{count} pkl files have been made.')
+            log.info(f'{count} pkl files have been made.')
         else:
-            print(f'{count} pkl file has been made.')
+            log.info(f'{count} pkl file has been made.')

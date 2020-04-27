@@ -1,0 +1,74 @@
+{
+    "data_maker_options":{
+        "features":["length_avg",
+                    "pld_stat_stb",
+                    "pld_pval_stb",
+                    "pld_stat_stb_with_cdf",
+                    "pld_pval_stb_with_cdf",
+                    "duration_std",
+                    "duration_avg"
+                    ],
+
+        "min_packet_size": 300,
+        "split_num_on_pld": 50,
+        "step_size": 300
+    },
+
+    
+    "pkl_maker": {
+        "cap_file_or_directory": "/Users/rav/Desktop/Development/Virtualenv/CameraDetector/project/cam-detector/data/old/etc/xwfscan-1C%3ABF%3ACE%3A74%3AE3%3ACB-20200114-015925.pcap",
+        "save_pkl": true,
+        "save_annotation_path": "data_path/example.txt",
+        "remove_dummies": true
+    },
+
+
+    "data_analysis": {
+        "dataset":[
+            ["pos", "data_path/pos_nm_up_paths.txt"],
+            ["neg", "data_path/neg_paths.txt"],
+            ["neg_dummy", "data_path/neg_dummy_paths.txt"]
+        ]
+    },
+
+
+    "train": {
+        "save_model_path": "saved_models/model.json",
+        "save_weight_path": "saved_models/weight.hdf5",
+        "save_norm_param_path": "saved_models/norm_params.txt",
+
+        "dataset":{
+            "train":{
+                "pos": ["data_path/pos_nm_up_paths.txt"],
+                "neg": ["data_path/neg_paths.txt", 
+                        "data_path/neg_dummy_paths.txt"]
+            }, 
+
+            "test":{
+                "pos": [],
+                "neg": []
+            },
+
+            "ratio":{
+                "train": 0.64,
+                "valid": 0.16,
+                "test": 0.2
+            }
+        },
+
+        "fit_options": {
+            "max_epoch": 300,
+            "batch_size": 128,
+            "verbose": 1
+        }
+    },
+
+
+    "predict": {
+        "load_model_path": "saved_models/model.json",
+        "load_weight_path": "saved_models/weight.hdf5",
+        "load_norm_param_path": "saved_models/norm_params.txt",
+
+        "load_cap_path": "/Users/rav/Desktop/Development/Virtualenv/CameraDetector/project/cam-detector/data/old/etc/xwfscan-1C%3ABF%3ACE%3A74%3AE3%3ACB-20200114-015925.pcap"
+    }
+}

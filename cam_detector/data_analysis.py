@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -7,7 +8,11 @@ import numpy as np
 from matplotlib.ticker import PercentFormatter
 
 from data_maker import make_data_list
-from logger import log
+from utils import logger, refine_features, parse_config
+
+log = logger(name=__name__,
+             level=logging.INFO)
+
 
 plt.rcParams.update({'figure.max_open_warning': 50})
 
@@ -68,19 +73,7 @@ def make_histogram(*data_dicts):
 
 if __name__ == '__main__':
 
-    argparser = argparse.ArgumentParser(description='config')
-    argparser.add_argument(
-        '-c',
-        '--conf',
-        required=True,
-        help='path to a configuration file')
-
-
-    args = argparser.parse_args()
-    config_path = args.conf
-
-    with open(config_path) as config_buffer:
-        conf = json.loads(config_buffer.read())
+    conf = parse_config()
 
     if not conf["data_analysis"]["dataset"]:
         log.info("check dataset")
@@ -88,10 +81,10 @@ if __name__ == '__main__':
     else:
         log.info("data loading ...")
 
-        min_data_size = conf["data_analysis"]["data_options"]["min_data_size"]
+        min_packet_size = conf["data_analysis"]["data_options"]["min_packet_size"]
         split_num = conf["data_analysis"]["data_options"]["split_num_on_pld"]
         step_size = conf["data_analysis"]["data_options"]["step_size"]
-        features_to_use = conf["data_analysis"]["features"]
+        features_to_use = refine_features(conf["data_analysis"]["features"])
 
         data_dict_list = []
         for name, path in conf["data_analysis"]["dataset"]:
@@ -99,7 +92,7 @@ if __name__ == '__main__':
                 path_list = f.read().splitlines()
 
             data_list = make_data_list(path_list,
-                                       min_data_size=min_data_size,
+                                       min_packet_size=min_packet_size,
                                        split_num_on_pld=split_num,
                                        step_size=step_size,
                                        features_to_use=features_to_use)

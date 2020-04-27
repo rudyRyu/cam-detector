@@ -20,13 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm, ks_2samp
 
-from logger import log
 from pkl_maker import read_pkl
-
-
-MIN_DATA_SIZE = 300
-SPLIT_NUM = 50
-STEP_DIVISION = 1
 
 
 def get_cdf1(data):
@@ -232,7 +226,7 @@ def get_vector(data, *, features_to_use=[],
     return vector
 
 
-def make_data_list(path_list, *, min_data_size=300,
+def make_data_list(path_list, *, min_packet_size=300,
                                  split_num_on_pld=50,
                                  step_size=300,
                                  features_to_use=None) -> list:
@@ -242,7 +236,7 @@ def make_data_list(path_list, *, min_data_size=300,
             flows = pickle.load(fp)
 
         vectors = make_data_list_from_flow(flows,
-                                           min_data_size=min_data_size,
+                                           min_packet_size=min_packet_size,
                                            split_num_on_pld=split_num_on_pld,
                                            step_size=step_size,
                                            features_to_use=features_to_use)
@@ -251,7 +245,7 @@ def make_data_list(path_list, *, min_data_size=300,
 
     return data_list
 
-def make_data_list_from_flow(flow, *, min_data_size=300,
+def make_data_list_from_flow(flow, *, min_packet_size=300,
                                       split_num_on_pld=50,
                                       step_size=300,
                                       features_to_use=None) -> list:
@@ -259,12 +253,12 @@ def make_data_list_from_flow(flow, *, min_data_size=300,
     for src, src_value in flow.items():
         for dst, dst_value in src_value.items():
             for fc, data in dst_value.items():
-                if len(data) < min_data_size:
+                if len(data) < min_packet_size:
                     continue
 
-                stop_len = len(data)-min_data_size
+                stop_len = len(data)-min_packet_size
                 for i in range(0, stop_len, step_size):
-                    vector = get_vector(data[i:i+min_data_size],
+                    vector = get_vector(data[i:i+min_packet_size],
                                         split_num_on_pld=split_num_on_pld,
                                         features_to_use=features_to_use)
                     data_list.append(vector)

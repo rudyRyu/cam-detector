@@ -150,3 +150,17 @@ $ python3 classifier.py -c config.json
 ```
 $ python3 predict.py -c config.json
 ```
+
+### * Features list
+```
+"length_avg",
+"pld_stat_stb",
+"pld_pval_stb",
+"pld_stat_stb_with_cdf",
+"pld_pval_stb_with_cdf",
+"duration_std",
+"duration_avg",
+"bandwidth_std",
+"bandwidth_avg",
+"flow_bandwidth"
+```

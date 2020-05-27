@@ -178,9 +178,9 @@ if __name__ == '__main__':
     y = y_pos + y_neg
 
     # Split data into train and valid
-    train_ratio = conf['train']['dataset']['ratio']['train']
-    valid_ratio = conf['train']['dataset']['ratio']['valid']
-    test_ratio = conf['train']['dataset']['ratio']['test']
+    train_ratio = conf['train']['dataset']['split_ratio']['train']
+    valid_ratio = conf['train']['dataset']['split_ratio']['valid']
+    test_ratio = conf['train']['dataset']['split_ratio']['test']
 
     split_ratio = (valid_ratio+test_ratio)/(train_ratio+valid_ratio+test_ratio)
     x_train, x_val, y_train, y_val = train_test_split(x, y,

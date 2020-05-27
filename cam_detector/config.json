@@ -14,9 +14,9 @@
         "step_size": 300
     },
 
-    
+
     "pkl_maker": {
-        "cap_file_or_directory": "/Users/rav/Desktop/Development/Virtualenv/CameraDetector/project/cam-detector/data/old/etc/xwfscan-1C%3ABF%3ACE%3A74%3AE3%3ACB-20200114-015925.pcap",
+        "cap_file_or_directory": "data/old/etc/",
         "save_pkl": true,
         "save_annotation_path": "data_path/example.txt",
         "remove_dummies": true
@@ -49,7 +49,7 @@
                 "neg": []
             },
 
-            "ratio":{
+            "split_ratio":{
                 "train": 0.64,
                 "valid": 0.16,
                 "test": 0.2

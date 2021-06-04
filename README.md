@@ -1,3 +1,8 @@
+This is an implementation of a wireless camera detector
+
+Reference: [On Detecting Hidden Wireless Cameras: A Traffic Pattern-based Approach
+](https://ieeexplore.ieee.org/document/8648293)
+
 # Installation
 
 ### Prerequisites
